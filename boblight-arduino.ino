@@ -31,7 +31,7 @@ void setup() {
   strip.setPixelColor(0, 0, 0, 0);
   strip.show();
   delay(200);
-  strip.setPixelColor(0, 0, 30, 0);
+  strip.setPixelColor(0, 0, 100, 0);
   // turn all the other pixels on so we know they're working
   for(uint16_t i = 1; i < PIXELS; ++i)
     strip.setPixelColor(i, 1, 1, 1);
