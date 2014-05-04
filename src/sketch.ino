@@ -4,16 +4,16 @@
 #define IR_PIN 11
 
 // Buttons
-#define PLAY     0xA173823E
-#define PAUSE     0x79017250
-#define STOP     0xB326197C
-#define REC     0x53B9034A
-#define RED     0x240C9161
-#define GREEN     0xA26409C9
-#define YELLOW     0xE01F9A81
-#define BLUE     0x68E839F1
-#define UP        0x4DE74847
-#define DOWN    0xB8781EF
+#define PLAY        0xA173823E
+#define PAUSE       0x79017250
+#define STOP        0xB326197C
+#define REC         0x53B9034A
+#define RED         0x240C9161
+#define GREEN       0xA26409C9
+#define YELLOW      0xE01F9A81
+#define BLUE        0x68E839F1
+#define UP          0x4DE74847
+#define DOWN        0xB8781EF
 
 boolean stateChanged = false;
 int state = 0;
@@ -35,11 +35,11 @@ decode_results results;
 
 int COLOR_RED[2][3] = {
     {255, 0, 0},
-    {255, 128, 128}
+    {255, 0, 157}
 };
 int COLOR_GREEN[2][3] = {
     {0, 255, 0},
-    {128, 255, 128}
+    {156, 255, 0}
 };
 int COLOR_YELLOW[2][3] = {
     {255, 255, 255},
@@ -47,7 +47,7 @@ int COLOR_YELLOW[2][3] = {
 };
 int COLOR_BLUE[2][3] = {
     {0, 0, 255},
-    {128, 128, 255}
+    {0, 155, 255}
 };
 int COLOR_BLACK[3] = {0, 0, 0};
 
