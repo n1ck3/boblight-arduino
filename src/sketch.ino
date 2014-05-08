@@ -38,14 +38,15 @@ decode_results results;
 #include <Adafruit_NeoPixel.h>
 
 #define LED_PIN 13
-/*#define PIXELS 218*/
-#define PIXELS 12
-#define serialRate 115200
+/*#define PIXELS 12*/
+#define PIXELS 218
+#define serialRate 1000000
 
 #define INTENSITY_STEP 0.05
 #define MINIMUM_INTENSITY 0.0
 #define MAXIMUM_INTENSITY 0.2
 
+#define BUSYWAIT_DELAY 5
 #define BUSYWAIT_UNTIL(cond, max_time) \
     do { \
         unsigned long t0; \
@@ -201,30 +202,19 @@ void boblight() {
 */
 
 
-    BUSYWAIT_UNTIL(Serial.available(), 5);
+    BUSYWAIT_UNTIL(Serial.available(), BUSYWAIT_DELAY);
     if(Serial.available()) {
         // Wait until we see the prefix
         byte idx = 0;
         static int fails = 0;
         for(idx=0; idx<sizeof prefix; idx++) {
-            BUSYWAIT_UNTIL(Serial.available(), 5);
+            BUSYWAIT_UNTIL(Serial.available(), BUSYWAIT_DELAY);
             byte data = Serial.read();
-            /*
-            Serial.print("idx=");
-            Serial.println(idx);
-
-            Serial.print("prefix[idx]=");
-            Serial.println(prefix[idx], HEX);
-
-            Serial.print("serial=");
-            Serial.println(data, HEX);
-            */
             if(data == prefix[idx]) {
                 // The byte of data is correct, test the next one.
                 continue;
             } else {
                 // The byte is incorrect, evac!
-
                 fails++;
                 idx = 0;
                 break;
@@ -240,15 +230,15 @@ void boblight() {
             for (uint8_t pixel=0; pixel<PIXELS; pixel++) {
                 byte red, green, blue;
 
-                BUSYWAIT_UNTIL(Serial.available(), 5);
+                BUSYWAIT_UNTIL(Serial.available(), BUSYWAIT_DELAY);
                 red = Serial.read();
                 //Serial.println(red, HEX);
 
-                BUSYWAIT_UNTIL(Serial.available(), 5);
+                BUSYWAIT_UNTIL(Serial.available(), BUSYWAIT_DELAY);
                 green = Serial.read();
                 //Serial.println(green, HEX);
 
-                BUSYWAIT_UNTIL(Serial.available(), 5);
+                BUSYWAIT_UNTIL(Serial.available(), BUSYWAIT_DELAY);
                 blue = Serial.read();
                 //Serial.println(blue, HEX);
 
@@ -351,7 +341,7 @@ void handle_ir_signal() {
                 Serial.println(results.value, HEX);
 
         }
-        delay(20);
+        //delay(20);
         irrecv.resume();
     }
 }
