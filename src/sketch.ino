@@ -3,8 +3,9 @@
 
 #define IR_PIN 11
 
-// Buttons
-/*
+/* Remotes */
+
+// Nicke's Remote
 #define PLAY        0xA173823E
 #define PAUSE       0x79017250
 #define STOP        0xB326197C
@@ -15,7 +16,9 @@
 #define BLUE        0x68E839F1
 #define UP          0x4DE74847
 #define DOWN        0xB8781EF
-*/
+
+/*
+//Mackan's Remote
 #define PLAY        0x6A618E02
 #define PAUSE       0x79017250
 #define STOP        0xC863D6C8
@@ -26,9 +29,10 @@
 #define BLUE        0x71A1FE88
 #define UP          0xC26BF044
 #define DOWN        0xC4FFB646
+*/
 
 boolean stateChanged = false;
-int state = 0;
+int state = true;
 
 IRrecv irrecv(IR_PIN);
 decode_results results;
@@ -38,14 +42,17 @@ decode_results results;
 #include <Adafruit_NeoPixel.h>
 
 #define LED_PIN 13
-/*#define PIXELS 218*/
-#define PIXELS 12
-#define serialRate 115200
+#define DEBUG_PIN 7
+/*#define PIXELS 12*/
+#define PIXELS 218
+/* #define serialRate 921600 */
+#define serialRate 1000000
 
 #define INTENSITY_STEP 0.05
 #define MINIMUM_INTENSITY 0.0
 #define MAXIMUM_INTENSITY 0.2
 
+#define BUSYWAIT_DELAY 5
 #define BUSYWAIT_UNTIL(cond, max_time) \
     do { \
         unsigned long t0; \
@@ -155,76 +162,20 @@ void boblight() {
         }
         strip.show();
     }
-/*
-    if (Serial.available()) {
-        // wait until we see the prefix
-        byte idx;
-        int test = 0;
-        for(idx = 0; idx < sizeof prefix; ++idx) {
-            waitLoop: while (!Serial.available()) ;;
-            byte data = Serial.read();
-            //Serial.println(data, HEX);
-            // look for the next byte in the sequence if we see the one we want
-            if(data == prefix[idx]) continue;
-            test++;
-            // otherwise, start over
-            idx = 0;
-            goto waitLoop;
-        }
-        Serial.println(test);
-        Serial.println(idx);
-        Serial.println(sizeof prefix);
-        // read the transmitted data
-        if (idx == sizeof prefix) {
-            for (uint8_t pixel=0; pixel<PIXELS; pixel++) {
-                byte red, green, blue;
 
-                while(!Serial.available());
-                red = Serial.read();
-
-                while(!Serial.available());
-                green = Serial.read();
-
-                while(!Serial.available());
-                blue = Serial.read();
-
-                strip.setPixelColor(
-                    pixel,
-                    (int)green*current_intensity,
-                    (int)red*current_intensity,
-                    (int)blue*current_intensity
-                );
-            }
-            strip.show();
-        }
-    }
-*/
-
-
-    BUSYWAIT_UNTIL(Serial.available(), 5);
+    BUSYWAIT_UNTIL(Serial.available(), BUSYWAIT_DELAY);
     if(Serial.available()) {
         // Wait until we see the prefix
         byte idx = 0;
         static int fails = 0;
         for(idx=0; idx<sizeof prefix; idx++) {
-            BUSYWAIT_UNTIL(Serial.available(), 5);
+            BUSYWAIT_UNTIL(Serial.available(), BUSYWAIT_DELAY);
             byte data = Serial.read();
-            /*
-            Serial.print("idx=");
-            Serial.println(idx);
-
-            Serial.print("prefix[idx]=");
-            Serial.println(prefix[idx], HEX);
-
-            Serial.print("serial=");
-            Serial.println(data, HEX);
-            */
             if(data == prefix[idx]) {
                 // The byte of data is correct, test the next one.
                 continue;
             } else {
                 // The byte is incorrect, evac!
-
                 fails++;
                 idx = 0;
                 break;
@@ -232,6 +183,7 @@ void boblight() {
         }
 
         if(idx == sizeof prefix) {
+
             Serial.println(fails);
             fails = 0;
             // If we have seen the whole prefix array
@@ -240,15 +192,15 @@ void boblight() {
             for (uint8_t pixel=0; pixel<PIXELS; pixel++) {
                 byte red, green, blue;
 
-                BUSYWAIT_UNTIL(Serial.available(), 5);
+                BUSYWAIT_UNTIL(Serial.available(), BUSYWAIT_DELAY);
                 red = Serial.read();
                 //Serial.println(red, HEX);
 
-                BUSYWAIT_UNTIL(Serial.available(), 5);
+                BUSYWAIT_UNTIL(Serial.available(), BUSYWAIT_DELAY);
                 green = Serial.read();
                 //Serial.println(green, HEX);
 
-                BUSYWAIT_UNTIL(Serial.available(), 5);
+                BUSYWAIT_UNTIL(Serial.available(), BUSYWAIT_DELAY);
                 blue = Serial.read();
                 //Serial.println(blue, HEX);
 
@@ -347,11 +299,11 @@ void handle_ir_signal() {
                 adjust_intensity("DOWN");
                 break;
 
-            default:
-                Serial.println(results.value, HEX);
+            /* default: */
+            /*     Serial.println(results.value, HEX); */
 
         }
-        delay(20);
+        //delay(20);
         irrecv.resume();
     }
 }
@@ -361,19 +313,23 @@ void setup() {
 
     /* BEGIN IR */
     irrecv.enableIRIn();
-    state = 1;
+    state = 2;
     stateChanged = true;
     /* END IR */
 
 
     /* BEGIN LED */
     strip.begin();
+    pinMode(DEBUG_PIN, OUTPUT);
     /* END LED */
 
     Serial.println("Initialized...");
 }
 
 void loop() {
+    digitalWrite(DEBUG_PIN, HIGH);
+    digitalWrite(DEBUG_PIN, LOW);
+
     handle_ir_signal();
 
     if (state == 0  && stateChanged == true) {
